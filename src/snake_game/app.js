@@ -85,12 +85,11 @@ function changeDirection(e) {
   if (e.key === " ") {
     gamePaused = !gamePaused;
     if (gamePaused) {
-      clearInterval(myGame);
       document.getElementById("gameStatus").innerText = "遊戲暫停";
       return;
     } else {
-      myGame = setInterval(draw, delay);
       document.getElementById("gameStatus").innerText = "";
+      requestAnimationFrame(gameLoop);
     }
   }
 
@@ -126,7 +125,8 @@ function draw() {
   // 每次繪製前，確認蛇有沒有咬到自己
   for (let i = 1; i < snake.length; i++) {
     if (snake[i].x == snake[0].x && snake[i].y == snake[0].y) {
-      clearInterval(myGame);
+      gamePaused = true;
+      cancelAnimationFrame(animationFrameId);
       alert("Game Over");
       return;
     }
@@ -186,6 +186,7 @@ function draw() {
   // 確認蛇是否吃到果實
   if (snake[0].x == myFruit.x && snake[0].y == myFruit.y) {
     myFruit.pickALocation(); // 重新選定果實位置
+
     // 更新分數
     score++;
     setHighestScore(score);
@@ -198,8 +199,6 @@ function draw() {
   snake.unshift(newHead); //新增蛇頭
   window.addEventListener("keydown", changeDirection); // 繪製完成後，重新添加方向監聽器
 }
-let delay = 150;
-let myGame = setInterval(draw, delay);
 
 function loadHighestScore() {
   if (localStorage.getItem("highestScore") == null) {
@@ -215,3 +214,32 @@ function setHighestScore(score) {
     highestScore = score;
   }
 }
+
+let delay = 150;
+
+// 宣告一個變數來追蹤上一次的繪製時間
+let lastRenderTime = 0;
+let animationFrameId;
+
+// 定義一個新的函數，用於執行遊戲動畫
+function gameLoop(timestamp) {
+  // 計算距離上一次繪製的時間差
+  const deltaTime = timestamp - lastRenderTime;
+
+  // 如果時間差足夠大，則進行下一次繪製
+  if (deltaTime > delay) {
+    // 執行遊戲的繪製邏輯
+    draw();
+
+    // 更新上一次繪製的時間
+    lastRenderTime = timestamp;
+  }
+  // 使用 requestAnimationFrame 註冊下一次動畫更新
+  // 若 gamePaused = true 則停止註冊
+  if (!gamePaused) {
+    animationFrameId = requestAnimationFrame(gameLoop);
+  }
+}
+
+// 啟動遊戲循環
+animationFrameId = requestAnimationFrame(gameLoop);
