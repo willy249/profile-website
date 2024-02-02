@@ -132,9 +132,9 @@ function draw() {
     }
   }
 
-  // 背景全設置為黑色，用於覆蓋原先所繪製的設置
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // 清除畫布，用於清除原先所繪製的設置
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   // 果實繪製
   myFruit.drawFruit();
 
@@ -198,7 +198,7 @@ function draw() {
   snake.unshift(newHead); //新增蛇頭
   window.addEventListener("keydown", changeDirection); // 繪製完成後，重新添加方向監聽器
 }
-let delay = 100;
+let delay = 150;
 let myGame = setInterval(draw, delay);
 
 function loadHighestScore() {
