@@ -2,7 +2,7 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-// const TerserPlugin = require("terser-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
 
 const project1HtmlFiles = {
   "index.html": "index.html",
@@ -57,6 +57,7 @@ module.exports = {
         removeEmptyAttributes: true, // 去除空白
         collapseWhitespace: true, // 去除空格
       },
+      inject: false, // 關閉 將自動生成的JS CSS 注入至HTML
       chunks: ["main"],
     }),
     ...Object.keys(project1HtmlFiles).map((entryName) => {
@@ -69,6 +70,7 @@ module.exports = {
           removeEmptyAttributes: true, // 去除空白
           collapseWhitespace: true, // 去除空格
         },
+        inject: false, // 關閉 將自動生成的JS CSS 注入至HTML
         chunks: ["project_1"],
       });
     }),
@@ -81,6 +83,7 @@ module.exports = {
         removeEmptyAttributes: true, // 去除空白
         collapseWhitespace: true, // 去除空格
       },
+      inject: false, // 關閉 將自動生成的JS CSS 注入至HTML
       chunks: ["project_2"],
     }),
     new HtmlWebpackPlugin({
@@ -92,6 +95,7 @@ module.exports = {
         removeEmptyAttributes: true, // 去除空白
         collapseWhitespace: true, // 去除空格
       },
+      inject: false, // 關閉 將自動生成的JS CSS 注入至HTML
       chunks: ["snake_game"],
     }),
 
@@ -106,7 +110,27 @@ module.exports = {
   ],
 
   optimization: {
-    minimizer: [new CssMinimizerPlugin()],
+    minimizer: [
+      new CssMinimizerPlugin({
+        minimizerOptions: {
+          preset: [
+            "default",
+            {
+              discardComments: { removeAll: true }, // 移除所有注释
+              sourceMap: false, // 禁用 source map
+            },
+          ],
+        },
+      }),
+      new TerserPlugin({
+        terserOptions: {
+          output: {
+            comments: false,
+          },
+        },
+        extractComments: false,
+      }),
+    ],
     minimize: true,
   },
 };
